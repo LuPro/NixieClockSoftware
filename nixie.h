@@ -7,6 +7,8 @@ public:
 
 private:
   unsigned char value;
+
+  //add pins to talk to this nixie tubes here
   
 };
 
