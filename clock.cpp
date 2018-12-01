@@ -1,7 +1,7 @@
 #include "clock.h"
 
 void Clock::showTime() {
-  unsigned char allDigits[MAX_DIGITS] = {time.getH() / 10, time.getH() % 10, time.getM() / 10, time.getM() % 10, time.getS() / 10, time.getS() % 10};
+  unsigned char allDigits[MAX_DIGITS] = {time.getHigh(time.getH()), time.getLow(time.getH()), time.getHigh(time.getM()), time.getLow(time.getM()), time.getHigh(time.getS()), time.getLow(time.getS())};
   unsigned char digits[NR_TUBES];
 
   //shove all data from allDigits to digits, if less digits are actually implemented (eg: 4) only those will be actually stored to be displayed.
@@ -12,7 +12,7 @@ void Clock::showTime() {
   
   //Apply time to the nixie tubes. Tubes themselves will check if there are any changes to a certain digit and if not will not change their output.
   for (unsigned char i = 0; i < NR_TUBES; i++) {
-    tubes[i].setNumber(digits[i]);
+    //tubes[i].setNumber(digits[i]);
   }
 }
 

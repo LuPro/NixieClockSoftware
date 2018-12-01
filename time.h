@@ -13,6 +13,13 @@ public:
     return s;
   }
 
+  inline unsigned char getLow(unsigned char value) {
+    return value % 10;
+  }
+  inline unsigned char getHigh(unsigned char value) {
+    return value / 10;
+  }
+
   inline void setH(short value, const bool &relative = false) {
     if (relative) {
       value %= 24;
