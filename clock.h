@@ -4,9 +4,11 @@
 #include "time.h"
 #include "nixies.h"
 
-
 class Clock {
 public:
+  //needs some variables for the RTC module, maybe also the variable of nixies.init()? Todo: figure that shit out
+  void init();
+
   //needs to be run in a loop
   void updateTime();
 
@@ -14,6 +16,8 @@ public:
 
 private:
   void loadTime();
+
+  void setTime(const Time &time);
 
   //Stores time
   Time time;

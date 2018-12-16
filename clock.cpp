@@ -1,5 +1,12 @@
 #include "clock.h"
 
+void Clock::init() {
+  nixies.init(1234, 1337, 42, 666, 420);  //Todo: enter actual pins here
+
+  //Todo: rest of the init function (initialize 
+  //loadTime();
+}
+
 void Clock::updateTime() {
   //loadTime()
 
@@ -20,6 +27,7 @@ void Clock::changeTime(const char &unit, const short &delta, const bool &relativ
   }
 
   nixies.showTime(time);
+  //rtc.setTime(time);
 }
 
 void Clock::loadTime() {
