@@ -1,19 +1,9 @@
 #include "clock.h"
 
-void Clock::showTime() {
-  unsigned char allDigits[MAX_DIGITS] = {time.getHigh(time.getH()), time.getLow(time.getH()), time.getHigh(time.getM()), time.getLow(time.getM()), time.getHigh(time.getS()), time.getLow(time.getS())};
-  unsigned char digits[NR_TUBES];
+void Clock::updateTime() {
+  //loadTime()
 
-  //shove all data from allDigits to digits, if less digits are actually implemented (eg: 4) only those will be actually stored to be displayed.
-  //If clock only has 4 digits (hh:mm) only those will be used for future use, if it has 6 (hh:mm:ss) all will be used.
-  for (unsigned char i = 0; i < NR_TUBES; i++) {
-    digits[i] = allDigits[i];
-  }
-  
-  //Apply time to the nixie tubes. Tubes themselves will check if there are any changes to a certain digit and if not will not change their output.
-  for (unsigned char i = 0; i < NR_TUBES; i++) {
-    //tubes[i].setNumber(digits[i]);
-  }
+  nixies.showTime(time);
 }
 
 void Clock::changeTime(const char &unit, const short &delta, const bool &relative) {
@@ -28,6 +18,8 @@ void Clock::changeTime(const char &unit, const short &delta, const bool &relativ
       time.setS(delta, relative);
       break;
   }
+
+  nixies.showTime(time);
 }
 
 void Clock::loadTime() {

@@ -13,10 +13,10 @@ public:
     return s;
   }
 
-  inline unsigned char getLow(unsigned char value) {
+  inline unsigned char getLow(unsigned char value) const {
     return value % 10;
   }
-  inline unsigned char getHigh(unsigned char value) {
+  inline unsigned char getHigh(unsigned char value) const {
     return value / 10;
   }
 
