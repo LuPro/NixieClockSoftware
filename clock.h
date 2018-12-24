@@ -3,6 +3,7 @@
 
 #include "time.h"
 #include "nixies.h"
+#include <RTClib.h>
 
 class Clock {
 public:
@@ -22,7 +23,7 @@ private:
   //Stores time
   Time time;
 
-  //RTC object needed
+  RTC_DS3231 rtc;
 
   Nixies nixies;
 };
