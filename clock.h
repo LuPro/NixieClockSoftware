@@ -15,13 +15,14 @@ public:
 
   void changeTime(const char &unit, const short &delta, const bool &relative = true);
 
+  void test();
+
 private:
   void loadTime();
 
-  void setTime(const Time &time);
+  void setTime(const DateTime &time);
 
-  //Stores time
-  Time time;
+  DateTime time;
 
   RTC_DS3231 rtc;
 

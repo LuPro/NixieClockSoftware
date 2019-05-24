@@ -1,37 +1,66 @@
 #include "clock.h"
 
+void Clock::test() {
+  setTime(DateTime(2019, 5, 24, 23, 06, 30));
+
+  nixies.showTime(time);
+}
+
 void Clock::init() {
-  nixies.init(1234, 1337, 42, 666, 420);  //Todo: enter actual pins here
+  nixies.init(10, 8, 9);
 
   while (!rtc.begin()); //initiates the real time clock module and halts until finished initializing
+  if (rtc.lostPower()) {
+    Serial.println("RTC Lost Power");
+    //set stuff for lost power info (maybe serial print, maybe some flag to make animations or shit dunno)
+  }
   //Todo: rest of the init function (initialize Todo: finish writing todos in the future
-  //loadTime();
+  loadTime();
 }
 
 void Clock::updateTime() {
-  loadTime()
+  loadTime();
 
   nixies.showTime(time);
 }
 
 void Clock::changeTime(const char &unit, const short &delta, const bool &relative) {
-  switch (unit) {
-    case 'h':
-      time.setH(delta, relative);
-      break;
-    case 'm':
-      time.setM(delta, relative);
-      break;
-    case 's':
-      time.setS(delta, relative);
-      break;
+  if (relative) {
+    switch (unit) {
+      case 'h':
+        time + TimeSpan(0, delta, 0, 0);
+        break;
+      case 'm':
+        time + TimeSpan(0, 0, delta, 0);
+        break;
+      case 's':
+        time + TimeSpan(0, 0, 0, delta);
+        break;
+    }
+  } else {
+    time = rtc.now();
+    switch (unit) {
+      case 'h':
+        time = DateTime(time.year(), time.month(), time.day(), delta, time.minute(), time.second());
+        break;
+      case 'm':
+        time = DateTime(time.year(), time.month(), time.day(), time.hour(), delta, time.second());
+        break;
+      case 's':
+        time = DateTime(time.year(), time.month(), time.day(), time.hour(), time.minute(), delta);
+        break;
+    }
   }
 
   nixies.showTime(time);
-  //rtc.setTime(time);
+  setTime(time);
 }
 
 void Clock::loadTime() {
-  //load time from the RTC unit and store it in this->time;
+  time = rtc.now();
 }
 
+void Clock::setTime(const DateTime &time) {
+  this->time = time;
+  rtc.adjust(time);
+}
