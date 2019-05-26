@@ -1,20 +1,14 @@
 #include "clock.h"
 
-void Clock::test() {
-  setTime(DateTime(2019, 5, 24, 23, 06, 30));
-
-  nixies.showTime(time);
-}
-
 void Clock::init() {
-  nixies.init(10, 8, 9);
+  nixies.init(ShiftRegister(NIXIES_DATA, NIXIES_CLOCK, NIXIES_LATCH), ShiftRegister(SPECIALS_DATA, SPECIALS_CLOCK, SPECIALS_LATCH));
 
   while (!rtc.begin()); //initiates the real time clock module and halts until finished initializing
   if (rtc.lostPower()) {
     Serial.println("RTC Lost Power");
     //set stuff for lost power info (maybe serial print, maybe some flag to make animations or shit dunno)
   }
-  //Todo: rest of the init function (initialize Todo: finish writing todos in the future
+  
   loadTime();
 }
 

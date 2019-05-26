@@ -26,7 +26,7 @@ enum PinsToPortOffset {
 class TouchButtonArray {
 public:
   TouchButtonArray();
-  
+
   bool getButtonState(const char &button);
 
   void pollButtons();
@@ -36,12 +36,12 @@ private:
   unsigned short meanValue[NR_BUTTONS];   //multiplied by 16
   void baseLowValue(unsigned short buttonValue, const char &button);
   unsigned short lowValue[NR_BUTTONS];    //multiplied by 64
-  
+
   void baseHighValue(unsigned short buttonValue, const char &button);
   unsigned short highValue[NR_BUTTONS];   //multiplied by 64
 
   void determineButtonState(unsigned short buttonValue, const char &button);
-  
+
   bool buttonStates[NR_BUTTONS];
   char button2pinMap[NR_BUTTONS] = {An0,An1,An2,An3,An6}; //Time UP, Time DOWN, Time Choose, On/Off
 

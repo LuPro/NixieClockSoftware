@@ -2,18 +2,30 @@
 #define NIXIES_H
 
 #include "RTClib.h"
-#include "Time.h"
 #include "Arduino.h"
+#include "shiftRegister.h"
+#include "animations.h"
 
 #define NR_TUBES 6
 #define MAX_TUBES 6
 
+enum MenuStates {
+  noMenu,
+  setSeconds,
+  setMinutes,
+  setHours
+};
+
 class Nixies {
 public:
   //sets the pins needed for the shift register chain and initializes the pins as needed, all of those pins just need digital out capabilities (Todo: shiftOutEn and shiftClear might not be needed, check for this later on)
-  void init(const unsigned char &shiftDataPin, const unsigned char &shiftClockPin, const unsigned char &shiftLatchPin);
+  void init(ShiftRegister nixieRegister, ShiftRegister specialsRegister);
 
   void showTime(const DateTime &time);
+
+  inline void setMenuState(MenuStates state) {
+    menuState = state;
+  }
 
 private:
   //generates a binary string of time data to be sent to the chained shift registers
@@ -25,19 +37,17 @@ private:
   //it starts with lowest bits
   void sendTimeToRegister(unsigned long timeString);
 
-  inline void applyRegisterBuffer() {
-    digitalWrite(shiftLatchPin, HIGH);
-    delayMicroseconds(1);
-    digitalWrite(shiftLatchPin, LOW);
-  }
+  void updateAnimations();
 
   //Pin for turning the high powered output (nixie power) from the power supply off
   unsigned char nixiePowerPin = 12;
 
-  //Pins for shift registers (main numbers), set by init function
-  unsigned char shiftDataPin = 0;
-  unsigned char shiftClockPin = 0;
-  unsigned char shiftLatchPin = 0;
+  ShiftRegister *nixieRegister;
+  ShiftRegister *specialsRegister;
+  
+  Animations animator;
+  
+  MenuStates menuState = noMenu;
 
   //stores the time string of the current displayed numbers on the nixies, used to cross check if there are changes in new time
   unsigned long currentTimeString; 

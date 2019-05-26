@@ -1,16 +1,11 @@
 #include "nixies.h"
 
-void Nixies::init(const unsigned char &shiftDataPin, const unsigned char &shiftClockPin, const unsigned char &shiftLatchPin) {
-  this->shiftDataPin = shiftDataPin;
-  this->shiftClockPin = shiftClockPin;
-  this->shiftLatchPin = shiftLatchPin;
-
-  pinMode(shiftDataPin, OUTPUT);
-  digitalWrite(shiftDataPin, LOW);
-  pinMode(shiftClockPin, OUTPUT);
-  digitalWrite(shiftClockPin, LOW);
-  pinMode(shiftLatchPin, OUTPUT);
-  digitalWrite(shiftLatchPin, LOW);
+void Nixies::init(ShiftRegister nixieRegister, ShiftRegister specialsRegister) {
+  this->nixieRegister = &nixieRegister;
+  this->specialsRegister = &specialsRegister;
+  
+  this->nixieRegister->clear();
+  this->specialsRegister->clear();
 }
 
 void Nixies::showTime(const DateTime &time) {
@@ -21,9 +16,33 @@ void Nixies::showTime(const DateTime &time) {
   if (newTimeString != currentTimeString) {
     Serial.print(time.hour()); Serial.print(":"); Serial.print(time.minute()); Serial.print(":"); Serial.println(time.second());
     sendTimeToRegister(newTimeString);
-    applyRegisterBuffer(); 
+    nixieRegister->applyBuffer();
     currentTimeString = newTimeString;
+
+    updateAnimations();
+    specialsRegister->applyBuffer();
   }  
+}
+
+void Nixies::updateAnimations() {
+  unsigned char animationPattern = 0;
+  
+  switch (menuState) {
+    case noMenu:
+      animationPattern = animator.clearAnimations();
+      break;
+    case setSeconds:
+      animationPattern = animator.dotPairToggle(0);
+      Serial.print("toggle: "); Serial.println(animationPattern);
+      break;
+    case setMinutes:
+      animationPattern = animator.dotPairToggle(1);
+      break;
+    case setHours:
+      animationPattern = animator.dotPairToggle(2);
+      break;
+  }
+  specialsRegister->sendByte(animationPattern);
 }
 
 unsigned long Nixies::generateTimeString(const DateTime &time) {
@@ -48,7 +67,7 @@ unsigned long Nixies::generateTimeString(const DateTime &time) {
 
 void Nixies::sendTimeToRegister(unsigned long timeString) {
   unsigned char digitString = 0;
-  
+
   for (unsigned char i = 0; i < (NR_TUBES * 4); i++) {
     //checks if there needs to be a new digit loaded into digitString (always when the old digit got sent and a new nixie needs data = always after 4 shifted bits
     if (i % 4 == 0) {
@@ -63,11 +82,7 @@ void Nixies::sendTimeToRegister(unsigned long timeString) {
     }
     //this sends the data strings to the shift registers, each bit individually. By doing this the individual digits will have their bit pattern reversed!
     //counteracted by loading the individual digits pre-reversed so that this reversing reverses the reverse and results in a non-reversed number (as seen above)
-    digitalWrite(shiftDataPin, (digitString & 1));
-    digitalWrite(shiftClockPin, HIGH);
+    nixieRegister->sendBit(digitString & 1);
     digitString = digitString >> 1;
-    delayMicroseconds(1);
-    digitalWrite(shiftClockPin, LOW);
-    digitalWrite(shiftDataPin, LOW);
   }
 }
