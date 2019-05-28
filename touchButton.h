@@ -27,7 +27,9 @@ class TouchButtonArray {
 public:
   TouchButtonArray();
 
-  bool getButtonState(const char &button);
+  bool getState(const char &button);
+
+  bool* getStates();
 
   void pollButtons();
 
@@ -44,11 +46,6 @@ private:
 
   bool buttonStates[NR_BUTTONS];
   char button2pinMap[NR_BUTTONS] = {An0,An1,An2,An3,An6}; //Time UP, Time DOWN, Time Choose, On/Off
-
-  //quick and dirty:
-  unsigned short buttonPressed = 0;
-
-  //bool buttonsDirty = false;  //store actual button value or store changes in button values?
 };
 
 #endif //TOUCHBUTTON_H

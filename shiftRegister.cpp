@@ -23,10 +23,10 @@ ShiftRegister::clear() {
   digitalWrite(latchPin, LOW);
 }
 
-void ShiftRegister::sendByte(unsigned char data, bool LSBfirst) {
+void ShiftRegister::sendData(uint16_t data, bool LSBfirst) {
   if (LSBfirst) {
-    for (unsigned char i = 0; i < (sizeof(unsigned char) * 8); i++) {
-      digitalWrite(dataPin, data & 1);
+    for (unsigned char i = 0; i < (sizeof(uint16_t) * 8); i++) {
+      digitalWrite(dataPin, (data & 1));
       digitalWrite(clockPin, HIGH);
       delayMicroseconds(1);
       digitalWrite(clockPin, LOW);
@@ -34,8 +34,8 @@ void ShiftRegister::sendByte(unsigned char data, bool LSBfirst) {
       data = data >> 1;
     }
   } else {
-    for (unsigned char i = 0; i < (sizeof(unsigned char) * 8); i++ ) {
-      digitalWrite(dataPin, data & 0b10000000);
+    for (unsigned char i = 0; i < (sizeof(uint16_t) * 8); i++) {
+      digitalWrite(dataPin, (data & 0b1000000000000000) ? HIGH : LOW);
       digitalWrite(clockPin, HIGH);
       delayMicroseconds(1);
       digitalWrite(clockPin, LOW);

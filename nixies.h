@@ -13,7 +13,9 @@ enum MenuStates {
   noMenu,
   setSeconds,
   setMinutes,
-  setHours
+  setHours,
+  rtcError,
+  bluetoothConnect
 };
 
 class Nixies {

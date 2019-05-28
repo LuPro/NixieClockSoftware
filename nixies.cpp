@@ -25,24 +25,23 @@ void Nixies::showTime(const DateTime &time) {
 }
 
 void Nixies::updateAnimations() {
-  unsigned char animationPattern = 0;
+  unsigned short animationPattern = 0;
   
   switch (menuState) {
     case noMenu:
       animationPattern = animator.clearAnimations();
       break;
     case setSeconds:
-      animationPattern = animator.dotPairToggle(0);
-      Serial.print("toggle: "); Serial.println(animationPattern);
+      animationPattern = animator.dotPairToggle(2);
       break;
     case setMinutes:
       animationPattern = animator.dotPairToggle(1);
       break;
     case setHours:
-      animationPattern = animator.dotPairToggle(2);
+      animationPattern = animator.dotPairToggle(0);
       break;
   }
-  specialsRegister->sendByte(animationPattern);
+  specialsRegister->sendData(animationPattern);
 }
 
 unsigned long Nixies::generateTimeString(const DateTime &time) {

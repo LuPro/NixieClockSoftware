@@ -7,10 +7,14 @@ TouchButtonArray::TouchButtonArray () {
   ADCSRA = 0b10000000;        //active ADC, reset everything else
 }
 
-bool TouchButtonArray::getButtonState (const char &button) {
+bool TouchButtonArray::getState (const char &button) {
   if (button >= 0 && button < NR_BUTTONS) {
     return buttonStates[button];
   }
+}
+
+bool* TouchButtonArray::getStates() {
+  return buttonStates;
 }
 
 void TouchButtonArray::pollButtons () {

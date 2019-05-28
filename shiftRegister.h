@@ -2,6 +2,7 @@
 #define SHIFTREGISTER_H
 
 #include "Arduino.h"
+#include "stdint.h"
 
 class ShiftRegister {
 public:
@@ -16,7 +17,7 @@ public:
     digitalWrite(clockPin, LOW);
     digitalWrite(dataPin, LOW);
   }
-  void sendByte(unsigned char data, bool LSBfirst = false);
+  void sendData(uint16_t data, bool LSBfirst = false);
 
   inline void applyBuffer() {
     digitalWrite(latchPin, HIGH);
