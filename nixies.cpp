@@ -16,32 +16,75 @@ void Nixies::showTime(const DateTime &time) {
   if (newTimeString != currentTimeString) {
     Serial.print(time.hour()); Serial.print(":"); Serial.print(time.minute()); Serial.print(":"); Serial.println(time.second());
     sendTimeToRegister(newTimeString);
-    nixieRegister->applyBuffer();
     currentTimeString = newTimeString;
 
-    updateAnimations();
-    specialsRegister->applyBuffer();
+    updateTimeSynchronousAnimations();
+    
+    nixieRegister->applyBuffer();
   }  
+  
+  updateAnimations();
 }
 
-void Nixies::updateAnimations() {
+void Nixies::updateTimeSynchronousAnimations() {
   unsigned short animationPattern = 0;
   
   switch (menuState) {
     case noMenu:
       animationPattern = animator.clearAnimations();
+      specialsRegister->applyBuffer();
       break;
     case setSeconds:
       animationPattern = animator.dotPairToggle(2);
+      specialsRegister->applyBuffer();
       break;
     case setMinutes:
       animationPattern = animator.dotPairToggle(1);
+      specialsRegister->applyBuffer();
       break;
     case setHours:
       animationPattern = animator.dotPairToggle(0);
+      specialsRegister->applyBuffer();
       break;
   }
+  
   specialsRegister->sendData(animationPattern);
+}
+
+void Nixies::updateAnimations() {
+  static unsigned long lastUpdate = millis();
+  unsigned long now = millis();
+  unsigned short animationPattern = 0;
+  
+  switch (menuState) {
+    case noMenu:
+      //add code to prevent this to be executed all the time (just once is enough)
+      /*animationPattern = animator.clearAnimations();
+      specialsRegister->sendData(animationPattern);
+      specialsRegister->applyBuffer();*/
+      break;
+    case rtcError:
+      if (calcTimeDelta(lastUpdate, now) > ERROR_BLINK_DELAY) {
+        animationPattern = animator.errorAnimation();
+        specialsRegister->sendData(animationPattern);
+        specialsRegister->applyBuffer();
+        lastUpdate = now;
+      }
+      break;
+    case startup:
+      if (calcTimeDelta(lastUpdate, now) > STARTUP_ANIM_DELAY) {
+        animationPattern = animator.startupAnimation();
+        if (animationPattern &0b1000000000000000) {
+          menuState = noMenu;
+          animationPattern = animator.clearAnimations();
+        }
+        
+        specialsRegister->sendData(animationPattern);
+        specialsRegister->applyBuffer();
+        lastUpdate = now;
+      }
+      break;
+  }
 }
 
 unsigned long Nixies::generateTimeString(const DateTime &time) {
@@ -83,5 +126,14 @@ void Nixies::sendTimeToRegister(unsigned long timeString) {
     //counteracted by loading the individual digits pre-reversed so that this reversing reverses the reverse and results in a non-reversed number (as seen above)
     nixieRegister->sendBit(digitString & 1);
     digitString = digitString >> 1;
+  }
+}
+
+unsigned long Nixies::calcTimeDelta(const unsigned long &timeOld, const unsigned long &timeNow) {
+  if (timeNow < timeOld) {
+    //Time variable has overflowed since last check
+    return ( ((unsigned long)-1) - timeOld ) + timeNow;
+  } else {
+    return timeNow - timeOld;
   }
 }

@@ -9,13 +9,18 @@
 #define NR_TUBES 6
 #define MAX_TUBES 6
 
+//make this as variable loaded from eeprom later on (so it can be changed via bluetooth and values can be stored)
+#define ERROR_BLINK_DELAY 300    //in ms
+#define STARTUP_ANIM_DELAY 100   //in ms
+
 enum MenuStates {
   noMenu,
   setSeconds,
   setMinutes,
   setHours,
   rtcError,
-  bluetoothConnect
+  bluetoothConnect,
+  startup
 };
 
 class Nixies {
@@ -39,7 +44,13 @@ private:
   //it starts with lowest bits
   void sendTimeToRegister(unsigned long timeString);
 
+  //update animations that should be synchronous with time change (frame update 1x per second at best, changes exactly when seconds change)
+  void updateTimeSynchronousAnimations();
+  
+  //update animations of other kinds (like error messages or bluetooth info)
   void updateAnimations();
+
+  unsigned long calcTimeDelta(const unsigned long &timeOld, const unsigned long &timeNow);
 
   //Pin for turning the high powered output (nixie power) from the power supply off
   unsigned char nixiePowerPin = 12;

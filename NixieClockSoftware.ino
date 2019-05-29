@@ -15,7 +15,7 @@ enum ButtonMapping {
 void setup () {
   Serial.begin(9600);
   clock.init();
-  clock.setMenuState(1);
+  clock.setMenuState(startup);
   
   //init buttons
   //pinMode(13,OUTPUT);
