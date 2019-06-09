@@ -21,6 +21,12 @@
 #define SPECIALS_CLOCK 8
 #define SPECIALS_LATCH 9
 
+//make this be in eeprom to be changed and stored in runtime
+#define AUTO_ON_TIME_H 9
+#define AUTO_ON_TIME_M 30
+#define AUTO_OFF_TIME_H 0
+#define AUTO_OFF_TIME_M 0
+
 class Clock {
 public:
   //needs some variables for the RTC module, maybe also the variable of nixies.init()? Todo: figure that shit out
@@ -30,8 +36,22 @@ public:
   void updateTime();
 
   //passthrough function
-  inline void setMenuState(unsigned char menuState) {
+  inline void setMenuState(MenuStates menuState) {
     nixies.setMenuState(menuState);
+  }
+  inline void setAutomaticMode(bool on) {
+    automaticMode = on;
+  }
+
+  inline MenuStates getMenuState () {
+    return nixies.getMenuState();
+  }
+  inline bool getAutomaticMode() {
+    return automaticMode;
+  }
+
+  inline void toggleNixiesOnOff() {
+    nixies.toggleNixiesOnOff();
   }
 
   void changeTime(const char &unit, const short &delta, const bool &relative = true);
@@ -39,6 +59,9 @@ public:
 private:
   void loadTime();
   void setTime(const DateTime &time);
+
+  bool automaticMode = true;
+  void autoOnOff();
 
   DateTime time;
   RTC_DS3231 rtc;

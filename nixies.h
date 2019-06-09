@@ -11,7 +11,14 @@
 
 //make this as variable loaded from eeprom later on (so it can be changed via bluetooth and values can be stored)
 #define ERROR_BLINK_DELAY 300    //in ms
-#define STARTUP_ANIM_DELAY 100   //in ms
+#define STARTUP_ANIM_DELAY 80    //in ms
+
+
+//variables for anti poison number cycling - move to eeprom later on
+#define POISON_CYCLE_DELAY 200   //in ms
+#define MIN_NR_CYCLES 15
+#define CHANCE_NR_LOCK 20        //in %
+#define INTERVALL_VARIANCE 5     //in min
 
 enum MenuStates {
   noMenu,
@@ -34,11 +41,29 @@ public:
     menuState = state;
   }
 
+  inline MenuStates getMenuState () {
+    return menuState;
+  }
+
+  inline void startupAnimation() {
+    stateBackup = menuState;
+    menuState = startup;
+  }
+
+  inline void toggleNixiesOnOff() {
+    digitalWrite(nixiePowerPin, !digitalRead(nixiePowerPin));
+  }
+  inline void setNixiesOnOff(bool on) {
+    digitalWrite(nixiePowerPin, on);
+  }
+
 private:
   //generates a binary string of time data to be sent to the chained shift registers
   //format is ss:mm:hh, hours at lowest values. If change to just 4 tubes code can still be used and seconds just shift into nothingness (seconds get lost)
   //each unit (digit pair) gets 8 bit, resulting string is 24 bit long
   unsigned long generateTimeString(const DateTime &time);
+  
+  unsigned long generateTimeString(const unsigned char &hours, const unsigned char &minutes, const unsigned char &seconds);
 
   //takes the generated time string from generateTimeString (in a ss:mm:hh format) and outputs it into the shift registers
   //it starts with lowest bits
@@ -49,6 +74,9 @@ private:
   
   //update animations of other kinds (like error messages or bluetooth info)
   void updateAnimations();
+
+  //function to cycle through all nixies to work against cathode poisoning
+  unsigned long antiPoison(DateTime time);
 
   unsigned long calcTimeDelta(const unsigned long &timeOld, const unsigned long &timeNow);
 
@@ -61,6 +89,7 @@ private:
   Animations animator;
   
   MenuStates menuState = noMenu;
+  MenuStates stateBackup = noMenu;
 
   //stores the time string of the current displayed numbers on the nixies, used to cross check if there are changes in new time
   unsigned long currentTimeString; 

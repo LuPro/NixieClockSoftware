@@ -13,9 +13,30 @@ bool TouchButtonArray::getState (const char &button) {
   }
 }
 
+bool TouchButtonArray::getChangedState (const char &button) {
+  if (button >= 0 && button < NR_BUTTONS) {
+    return changedStates[button];
+  }
+}
+
+unsigned short TouchButtonArray::getTimeLastActive (const char &button) {
+  if (button >= 0 && button < NR_BUTTONS) {
+    return timeLastActive[button];
+  }
+}
+
 bool* TouchButtonArray::getStates() {
   return buttonStates;
 }
+
+bool* TouchButtonArray::getChangedStates() {
+  return changedStates;
+}
+
+unsigned short* TouchButtonArray::getTimesLastActive() {
+  return timeLastActive;
+}
+
 
 void TouchButtonArray::pollButtons () {
   //check every button
@@ -60,6 +81,36 @@ void TouchButtonArray::pollButtons () {
   }
 }
 
+void TouchButtonArray::pollTestButtons () {
+  bool button = false;
+  static bool firstRun = true;
+  static unsigned long lastActivation[NR_BUTTONS];
+  
+  if (firstRun == 0) {
+    for (char x = 0; x < NR_BUTTONS; x++) {
+      lastActivation[x] = 0;
+    }
+    firstRun = false;
+  }
+
+  for (unsigned char i = 0; i < NR_BUTTONS; i++) {
+    button = digitalRead(14 + i);
+    if (buttonStates[i] == button) {
+      changedStates[i] = false;
+      timeLastActive[i] = calcTimeDelta(lastActivation[i], millis());
+      if (timeLastActive[i] > BUTTON_DOUBLE_TIMEOUT) {
+        timeLastActive[i] = 0;
+      }
+    } else {
+      buttonStates[i] = button;
+      changedStates[i] = true;
+      if (button) {
+        lastActivation[i] = millis();
+      }
+    }
+  }
+}
+
 void TouchButtonArray::calcMeanValue(unsigned short buttonValue, const char &button) {
   meanValue[button] = meanValue[button] - (meanValue[button] >> 4) + buttonValue;
 }
@@ -78,6 +129,7 @@ void TouchButtonArray::baseHighValue(unsigned short buttonValue, const char &but
 
 void TouchButtonArray::determineButtonState (unsigned short buttonValue, const char &button) {
   static unsigned short i = 0, n[NR_BUTTONS], m[NR_BUTTONS];
+  static unsigned long lastActivation[NR_BUTTONS];
 
   baseLowValue(buttonValue, button);
   baseHighValue(buttonValue, button);
@@ -86,6 +138,7 @@ void TouchButtonArray::determineButtonState (unsigned short buttonValue, const c
     for (char x = 0; x < NR_BUTTONS; x++) {
       n[x] = 0;
       m[x] = 0;
+      lastActivation[x] = 0;
     }
   }
 
@@ -93,9 +146,11 @@ void TouchButtonArray::determineButtonState (unsigned short buttonValue, const c
     if (buttonStates[button]) {
       if (n[button] > BUTTON_STATE_LOCK) {
         if (meanValue[button] * 4 < highValue[button] - MARGIN_STATE_CHANGE) {
+          changedStates[button] = true;
           buttonStates[button] = false;
           n[button] = 0;
         } else {
+          changedStates[button] = false;
           buttonStates[button] = true;
         }
       } else {
@@ -106,9 +161,19 @@ void TouchButtonArray::determineButtonState (unsigned short buttonValue, const c
     } else {
       if (m[button] > BUTTON_STATE_LOCK) {
         if (meanValue[button] * 4 > lowValue[button] + MARGIN_STATE_CHANGE) {
+          lastActivation[button] = millis();
+          timeLastActive[button] = 1;
+          changedStates[button] = true;
           buttonStates[button] = true;
           m[button] = 0;
         } else {
+          if (calcTimeDelta(lastActivation[button], millis()) > BUTTON_DOUBLE_TIMEOUT) {
+            timeLastActive[button] = 0;
+            Serial.println("Double Timeout");
+          } else {
+            timeLastActive[button] = calcTimeDelta(lastActivation[button], millis());
+          }
+          changedStates[button] = false;
           buttonStates[button] = false;
         }
       } else {
@@ -121,5 +186,14 @@ void TouchButtonArray::determineButtonState (unsigned short buttonValue, const c
     i++;
     buttonStates[button] = false;
     lowValue[button] = meanValue[button] << 2;
+  }
+}
+
+unsigned short TouchButtonArray::calcTimeDelta(const unsigned long &timeOld, const unsigned long &timeNow) {
+  if (timeNow < timeOld) {
+    //Time variable has overflowed since last check
+    return ( ((unsigned long) - 1) - timeOld ) + timeNow;
+  } else {
+    return timeNow - timeOld;
   }
 }

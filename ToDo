@@ -1,0 +1,11 @@
+===ToDo===
+
+* EEPROM storage
+** store several variables in EEPROM (eg: delays/speeds for animations or some preferences)
+** variables should be able to be read and set - setting should happen by using the bluetooth module with a data protocol (ASCII, not bit pattern based)
+** variables should be buffered in RAM as well (ease/speed of access)
+
+* Bluetooth data protocol and communication (see above)
+
+* Nixie anti burn-in animations
+
