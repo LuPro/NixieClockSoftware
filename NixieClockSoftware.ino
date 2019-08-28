@@ -1,12 +1,14 @@
 #include "clock.h"
 #include "touchButton.h"
 #include "animations.h"
+#include "serialHandler.h"
 
 #include "stdint.h"
 
 Clock clock;
 Animations animator;
 TouchButtonArray buttons;
+SerialHandler bluetooth;
 
 enum ButtonMapping {
   timeUp,
@@ -26,6 +28,7 @@ void setup () {
 
 void loop () {
   clock.updateTime();
+  bluetooth.poll();
   //buttons.pollButtons();
   buttons.pollTestButtons();
 

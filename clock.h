@@ -66,7 +66,6 @@ private:
   DateTime time;
   RTC_DS3231 rtc;
   Nixies nixies;
-
 };
 
 #endif //CLOCK_H

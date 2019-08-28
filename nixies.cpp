@@ -18,12 +18,14 @@ void Nixies::showTime(const DateTime &time) {
   //if they are the same the rest gets skipped (no need to send to registers/nixies when the time is already correct)
   if (newTimeString != currentTimeString) {
     //Serial.print("RTC Time: "); Serial.print(time.hour()); Serial.print(":"); Serial.print(time.minute()); Serial.print(":"); Serial.println(time.second());
-    unsigned long timeStringCopy = newTimeString;
+    
+    //this is output for debugging purposes
+    /*unsigned long timeStringCopy = newTimeString;
     for (char i = 0; i < NR_TUBES; i++) {
       Serial.print(timeStringCopy & 0b1111); Serial.print(" ");
       timeStringCopy = timeStringCopy >> 4;
     }
-    Serial.println();
+    Serial.println();*/
     //Serial.println(newTimeString); Serial.println();
     sendTimeToRegister(newTimeString);
     currentTimeString = newTimeString;

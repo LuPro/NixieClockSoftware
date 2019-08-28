@@ -1,4 +1,4 @@
-#ifndef TIME_H
+/*#ifndef TIME_H
 #define TIME_H
 
 class Time {
@@ -58,4 +58,4 @@ private:
   unsigned char h, m, s;
 };
 
-#endif //TIME_H
+#endif //TIME_H*/
