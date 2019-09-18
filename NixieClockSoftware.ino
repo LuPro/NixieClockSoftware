@@ -27,8 +27,10 @@ void setup () {
 }
 
 void loop () {
+  Command bluetoothCommand;
+  
   clock.updateTime();
-  bluetooth.poll();
+  bluetoothCommand = bluetooth.poll();
   //buttons.pollButtons();
   buttons.pollTestButtons();
 
